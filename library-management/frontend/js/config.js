@@ -1,6 +1,6 @@
 // ── API BASE URL ──────────────────────────────────────────────
 // Change this to match your FastAPI server address
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://library-management-07.up.railway.app';
 
 // ── CATEGORY ACCENT COLORS ────────────────────────────────────
 const CAT_COLORS = {
