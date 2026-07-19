@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Dashboard — Biblioteca</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-logo">📚</span>
+    <div>
+      <div class="sidebar-brand">Biblioteca</div>
+      <div class="sidebar-sub">Staff Portal</div>
+    </div>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-link active" data-section="dashboard">
+      <span class="nav-icon">🏠</span> Dashboard
+    </a>
+    <a href="#" class="nav-link" data-section="books">
+      <span class="nav-icon">📖</span> Books
+    </a>
+    <a href="#" class="nav-link" data-section="issue">
+      <span class="nav-icon">📤</span> Issue Book
+    </a>
+    <a href="#" class="nav-link" data-section="returns">
+      <span class="nav-icon">📥</span> Returns
+    </a>
+    <a href="#" class="nav-link" data-section="students">
+      <span class="nav-icon">🎓</span> Students
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-badge">
+      <div class="user-avatar" id="staffAvatar">A</div>
+      <div>
+        <div class="user-name" id="staffName">Admin</div>
+        <div class="user-role">Library Staff</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn">⏻ Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="layout">
+  <header class="topbar">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbarDate"></span>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ── DASHBOARD ─────────────────────────────────────── -->
+    <section class="section active" id="sec-dashboard">
+      <div class="section-header">
+        <h2 class="section-title">Overview</h2>
+        <button class="btn btn-sm" onclick="loadStats()">↻ Refresh</button>
+      </div>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card" style="--accent:#6C63FF">
+          <div class="stat-icon">📚</div>
+          <div class="stat-val" id="stat-books">—</div>
+          <div class="stat-label">Total Books</div>
+        </div>
+        <div class="stat-card" style="--accent:#00C9A7">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-val" id="stat-students">—</div>
+          <div class="stat-label">Students</div>
+        </div>
+        <div class="stat-card" style="--accent:#F7B731">
+          <div class="stat-icon">📤</div>
+          <div class="stat-val" id="stat-issued">—</div>
+          <div class="stat-label">Active Issues</div>
+        </div>
+        <div class="stat-card" style="--accent:#FC5C65">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-val" id="stat-overdue">—</div>
+          <div class="stat-label">Overdue</div>
+        </div>
+        <div class="stat-card" style="--accent:#45B7D1">
+          <div class="stat-icon">🗂️</div>
+          <div class="stat-val" id="stat-total-copies">—</div>
+          <div class="stat-label">Total Copies</div>
+        </div>
+        <div class="stat-card" style="--accent:#96CEB4">
+          <div class="stat-icon">✅</div>
+          <div class="stat-val" id="stat-avail-copies">—</div>
+          <div class="stat-label">Available Copies</div>
+        </div>
+      </div>
+
+      <div class="recent-section">
+        <h3 class="subsection-title">⚠️ Overdue Books</h3>
+        <div class="table-wrap">
+          <table class="data-table" id="overdueTable">
+            <thead><tr>
+              <th>Book</th><th>Student</th><th>Roll No</th>
+              <th>Due Date</th><th>Overdue</th><th>Action</th>
+            </tr></thead>
+            <tbody id="overdueBody"><tr><td colspan="6" class="loading-row">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BOOKS ──────────────────────────────────────────── -->
+    <section class="section" id="sec-books">
+      <div class="section-header">
+        <h2 class="section-title">Book Catalog</h2>
+        <button class="btn btn-primary" onclick="openBookModal()">+ Add Book</button>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="bookSearch" class="search-input" placeholder="Search by title, author, ISBN…" />
+        </div>
+        <select id="catFilter" class="select-input">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Title</th><th>Author</th><th>Category</th>
+            <th>ISBN</th><th>Total</th><th>Available</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="booksBody"><tr><td colspan="7" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── ISSUE ──────────────────────────────────────────── -->
+    <section class="section" id="sec-issue">
+      <div class="section-header">
+        <h2 class="section-title">Issue a Book</h2>
+      </div>
+      <div class="issue-layout">
+        <div class="issue-form-card card">
+          <h3>Issue Form</h3>
+          <div class="form-group">
+            <label>Search Student</label>
+            <input type="text" id="issueStudentSearch" class="form-input" placeholder="Name or roll number…" />
+          </div>
+          <div class="autocomplete-list" id="studentAutocomplete"></div>
+          <div class="selected-chip" id="selectedStudent" style="display:none"></div>
+
+          <div class="form-group">
+            <label>Search Book</label>
+            <input type="text" id="issueBookSearch" class="form-input" placeholder="Title or author…" />
+          </div>
+          <div class="autocomplete-list" id="bookAutocomplete"></div>
+          <div class="selected-chip" id="selectedBook" style="display:none"></div>
+
+          <div class="form-group">
+            <label>Due in (days)</label>
+            <input type="number" id="dueDays" class="form-input" value="14" min="1" max="90" />
+          </div>
+          <button class="btn btn-primary btn-block" id="issueBtn" onclick="issueBook()">Issue Book</button>
+          <div class="form-msg" id="issueMsg"></div>
+        </div>
+
+        <div class="card">
+          <h3>Active Issues</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr>
+                <th>Book</th><th>Student</th><th>Issued</th><th>Due</th><th>Status</th>
+              </tr></thead>
+              <tbody id="activeIssuesBody"><tr><td colspan="5" class="loading-row">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RETURNS ────────────────────────────────────────── -->
+    <section class="section" id="sec-returns">
+      <div class="section-header">
+        <h2 class="section-title">Book Returns</h2>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="returnSearch" class="search-input" placeholder="Search by book or student…" oninput="filterReturns()" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Book</th><th>Author</th><th>Student</th><th>Roll No</th>
+            <th>Issued</th><th>Due Date</th><th>Status</th><th>Return</th>
+          </tr></thead>
+          <tbody id="returnsBody"><tr><td colspan="8" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── STUDENTS ───────────────────────────────────────── -->
+    <section class="section" id="sec-students">
+      <div class="section-header">
+        <h2 class="section-title">Students</h2>
+        <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="studentSearch" class="search-input" placeholder="Search by name or roll number…" oninput="loadStudents()" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Name</th><th>Username</th><th>Email</th><th>Roll No</th><th>Joined</th>
+          </tr></thead>
+          <tbody id="studentsBody"><tr><td colspan="5" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── BOOK MODAL ──────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="bookModalTitle">Add Book</h3>
+      <button class="modal-close" onclick="closeBookModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editBookId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="fTitle" class="form-input" placeholder="Book title" />
+        </div>
+        <div class="form-group">
+          <label>Author *</label>
+          <input type="text" id="fAuthor" class="form-input" placeholder="Author name" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <input type="text" id="fCategory" class="form-input" placeholder="e.g. Computer Science" />
+        </div>
+        <div class="form-group">
+          <label>ISBN</label>
+          <input type="text" id="fIsbn" class="form-input" placeholder="978-…" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Total Copies *</label>
+        <input type="number" id="fCopies" class="form-input" value="1" min="1" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="fDesc" class="form-input" rows="3" placeholder="Brief description…"></textarea>
+      </div>
+      <div class="form-msg" id="bookFormMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeBookModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBook()">Save Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── STUDENT MODAL ───────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Student</h3>
+      <button class="modal-close" onclick="closeStudentModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="sName" class="form-input" placeholder="Student name" />
+        </div>
+        <div class="form-group">
+          <label>Roll Number *</label>
+          <input type="text" id="sRoll" class="form-input" placeholder="CS2024001" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Username *</label>
+          <input type="text" id="sUser" class="form-input" placeholder="login username" />
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" id="sPass" class="form-input" placeholder="password" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="sEmail" class="form-input" placeholder="student@college.edu" />
+      </div>
+      <div class="form-msg" id="studentFormMsg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeStudentModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ───────────────────────────────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/staff.js"></script>
+</body>
+</html>

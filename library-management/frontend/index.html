@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblioteca — Library Management</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="login-bg">
+    <div class="bg-grid"></div>
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+  </div>
+
+  <main class="login-wrap">
+    <div class="login-left">
+      <div class="brand">
+        <span class="brand-icon">📚</span>
+        <h1 class="brand-name">Biblioteca</h1>
+        <p class="brand-tagline">Library Management System</p>
+      </div>
+      <div class="role-tabs">
+        <button class="role-tab active" data-role="staff">
+          <span class="tab-icon">🏛️</span>
+          <span>Library Staff</span>
+        </button>
+        <button class="role-tab" data-role="student">
+          <span class="tab-icon">🎓</span>
+          <span>Student</span>
+        </button>
+      </div>
+
+      <form class="login-form" id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input type="text" id="username" placeholder="Enter your username" autocomplete="username" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+            <button type="button" class="toggle-pw" id="togglePw">👁️</button>
+          </div>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-loader" style="display:none">⏳</span>
+        </button>
+      </form>
+
+      <div class="demo-creds">
+        <p class="demo-title">Demo Credentials</p>
+        <div class="demo-grid">
+          <div class="demo-card" data-u="admin" data-p="staff123" data-r="staff">
+            <span class="demo-role">Staff</span>
+            <code>admin / staff123</code>
+          </div>
+          <div class="demo-card" data-u="kabil" data-p="student123" data-r="student">
+            <span class="demo-role">Student</span>
+            <code>kabil / student123</code>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <div class="feature-list">
+        <div class="feature">
+          <span class="feature-icon">📖</span>
+          <div>
+            <h3>Book Catalog</h3>
+            <p>Browse thousands of books with live availability</p>
+          </div>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🔄</span>
+          <div>
+            <h3>Issue & Return</h3>
+            <p>Seamless borrowing with real-time copy tracking</p>
+          </div>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">📊</span>
+          <div>
+            <h3>Live Analytics</h3>
+            <p>Dashboard stats updated instantly across both portals</p>
+          </div>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🔔</span>
+          <div>
+            <h3>Due Date Alerts</h3>
+            <p>Never miss a return with overdue tracking</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

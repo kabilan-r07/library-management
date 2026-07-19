@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard — Biblioteca</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-logo">📚</span>
+    <div>
+      <div class="sidebar-brand">Biblioteca</div>
+      <div class="sidebar-sub">Student Portal</div>
+    </div>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-link active" data-section="dashboard">
+      <span class="nav-icon">🏠</span> My Dashboard
+    </a>
+    <a href="#" class="nav-link" data-section="browse">
+      <span class="nav-icon">📖</span> Browse Books
+    </a>
+    <a href="#" class="nav-link" data-section="mybooks">
+      <span class="nav-icon">📋</span> My Books
+    </a>
+    <a href="#" class="nav-link" data-section="history">
+      <span class="nav-icon">🕐</span> History
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-badge">
+      <div class="user-avatar" id="stuAvatar">S</div>
+      <div>
+        <div class="user-name" id="stuName">Student</div>
+        <div class="user-role" id="stuRoll">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="logoutBtn">⏻ Logout</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="layout">
+  <header class="topbar">
+    <button class="hamburger" id="hamburger">☰</button>
+    <div class="topbar-title" id="pageTitle">My Dashboard</div>
+    <div class="topbar-actions">
+      <span class="topbar-date" id="topbarDate"></span>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ── DASHBOARD ─────────────────────────────────────── -->
+    <section class="section active" id="sec-dashboard">
+      <div class="section-header">
+        <h2 class="section-title">Welcome back, <span id="welcomeName">Student</span> 👋</h2>
+        <button class="btn btn-sm" onclick="loadStudentStats()">↻ Refresh</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card" style="--accent:#6C63FF">
+          <div class="stat-icon">📤</div>
+          <div class="stat-val" id="stu-active">—</div>
+          <div class="stat-label">Books Borrowed</div>
+        </div>
+        <div class="stat-card" style="--accent:#00C9A7">
+          <div class="stat-icon">✅</div>
+          <div class="stat-val" id="stu-returned">—</div>
+          <div class="stat-label">Books Returned</div>
+        </div>
+        <div class="stat-card" style="--accent:#FC5C65">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-val" id="stu-overdue">—</div>
+          <div class="stat-label">Overdue Books</div>
+        </div>
+      </div>
+
+      <div class="recent-section">
+        <h3 class="subsection-title">📤 Currently Borrowed</h3>
+        <div id="currentBooksGrid" class="book-cards-grid">
+          <div class="loading-row">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BROWSE ─────────────────────────────────────────── -->
+    <section class="section" id="sec-browse">
+      <div class="section-header">
+        <h2 class="section-title">Browse Books</h2>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="browseSearch" class="search-input" placeholder="Search by title, author, or category…" oninput="browseBooks()" />
+        </div>
+        <select id="browseCat" class="select-input" onchange="browseBooks()">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div id="browseGrid" class="book-cards-grid">
+        <div class="loading-row">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ── MY BOOKS ───────────────────────────────────────── -->
+    <section class="section" id="sec-mybooks">
+      <div class="section-header">
+        <h2 class="section-title">My Current Books</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Book</th><th>Author</th><th>Category</th>
+            <th>Issued</th><th>Due Date</th><th>Status</th>
+          </tr></thead>
+          <tbody id="myBooksBody"><tr><td colspan="6" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── HISTORY ────────────────────────────────────────── -->
+    <section class="section" id="sec-history">
+      <div class="section-header">
+        <h2 class="section-title">Borrowing History</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Book</th><th>Author</th><th>Category</th>
+            <th>Issued</th><th>Due Date</th><th>Returned</th><th>Status</th>
+          </tr></thead>
+          <tbody id="historyBody"><tr><td colspan="7" class="loading-row">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── TOAST ───────────────────────────────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/student.js"></script>
+</body>
+</html>
