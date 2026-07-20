@@ -350,6 +350,8 @@ def delete_student(student_id: int, db=Depends(get_db)):
     cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE id = %s", (student_id,))
     if cursor.fetchone()["cnt"] == 0:
         raise HTTPException(status_code=404, detail="Student not found")
+    # Remove the student's issue history (returned books) so the delete can proceed
+    cursor.execute("DELETE FROM issued_books WHERE student_id = %s", (student_id,))
     cursor.execute("DELETE FROM students WHERE id = %s", (student_id,))
     db.commit()
     return {"success": True, "message": "Student removed"}
