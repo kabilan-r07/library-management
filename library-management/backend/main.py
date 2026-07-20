@@ -7,6 +7,9 @@ from mysql.connector import Error
 from datetime import date, timedelta
 import hashlib
 import os
+import io
+import openpyxl
+from fastapi import UploadFile, File
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -351,6 +354,44 @@ def delete_student(student_id: int, db=Depends(get_db)):
     db.commit()
     return {"success": True, "message": "Student removed"}
 
+@app.post("/api/students/bulk-import")
+async def bulk_import_students(file: UploadFile = File(...), db=Depends(get_db)):
+    contents = await file.read()
+    workbook = openpyxl.load_workbook(io.BytesIO(contents))
+    sheet = workbook.active
+
+    rows = list(sheet.iter_rows(min_row=2, values_only=True))
+    cursor = db.cursor()
+
+    added = 0
+    skipped = []
+
+    for row in rows:
+        if not row or not row[0]:
+            continue
+        try:
+            name, roll_number, username, password, email = row[:5]
+            if not all([name, roll_number, username, password]):
+                skipped.append(f"{name or 'Unknown'} (missing required field)")
+                continue
+            cursor.execute(
+                """INSERT INTO students (name, username, password_hash, email, roll_number)
+                   VALUES (%s, %s, %s, %s, %s)""",
+                (str(name).strip(), str(username).strip(), hash_password(str(password)),
+                 str(email).strip() if email else "", str(roll_number).strip())
+            )
+            added += 1
+        except Error as e:
+            skipped.append(f"{row[0]} ({'duplicate' if 'Duplicate' in str(e) else 'error'})")
+
+    db.commit()
+    return {
+        "success": True,
+        "added": added,
+        "skipped_count": len(skipped),
+        "skipped": skipped[:20],
+        "message": f"{added} students added, {len(skipped)} skipped"
+    }
 
 # ── DASHBOARD STATS ────────────────────────────────────────────────────────────
 @app.get("/api/stats")

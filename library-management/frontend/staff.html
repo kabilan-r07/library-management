@@ -212,9 +212,13 @@
     <!-- ── STUDENTS ───────────────────────────────────────── -->
     <section class="section" id="sec-students">
       <div class="section-header">
-        <h2 class="section-title">Students</h2>
-        <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
-      </div>
+  <h2 class="section-title">Students</h2>
+  <div style="display:flex; gap:10px;">
+    <button class="btn" onclick="document.getElementById('excelFileInput').click()">📤 Import Excel</button>
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)" />
+    <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+  </div>
+</div>
       <div class="filter-bar">
         <div class="search-wrap">
           <span class="search-icon">🔍</span>
@@ -323,6 +327,21 @@
 </div>
 
 <!-- ── TOAST ───────────────────────────────────────────────────────────────── -->
+ <!-- ── IMPORT RESULT MODAL ─────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="importResultModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Import Result</h3>
+      <button class="modal-close" onclick="closeImportResultModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="importResultBody"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeImportResultModal()">Close</button>
+    </div>
+  </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="js/config.js"></script>

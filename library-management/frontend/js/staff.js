@@ -450,6 +450,49 @@ async function deleteStudent(id, name) {
   } catch(e) { showToast(e.message, 'error'); }
 }
 
+async function importExcel(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/students/bulk-import`, {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+
+    if (!res.ok) throw new Error(result.detail || 'Import failed');
+
+    let html = `<p style="font-size:16px; margin-bottom:12px;">
+      ✅ <strong>${result.added}</strong> students added successfully.<br>
+      ${result.skipped_count > 0 ? `⚠️ <strong>${result.skipped_count}</strong> skipped.` : ''}
+    </p>`;
+
+    if (result.skipped && result.skipped.length > 0) {
+      html += `<div style="max-height:200px; overflow-y:auto; font-size:13px; opacity:0.8;">
+        <strong>Skipped:</strong><br>${result.skipped.join('<br>')}
+      </div>`;
+    }
+
+    document.getElementById('importResultBody').innerHTML = html;
+    document.getElementById('importResultModal').classList.add('open');
+
+    loadStudents();
+    loadStats();
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    event.target.value = '';
+  }
+}
+
+function closeImportResultModal() {
+  document.getElementById('importResultModal').classList.remove('open');
+}
+
 // ── HELPERS ────────────────────────────────────────────────────
 function setMsg(el, msg, type) {
   el.textContent = msg;
