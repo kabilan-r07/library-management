@@ -224,7 +224,7 @@
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr>
-            <th>Name</th><th>Username</th><th>Email</th><th>Roll No</th><th>Joined</th>
+              <th>Name</th><th>Username</th><th>Email</th><th>Roll No</th><th>Joined</th><th>Actions</th>
           </tr></thead>
           <tbody id="studentsBody"><tr><td colspan="5" class="loading-row">Loading…</td></tr></tbody>
         </table>
@@ -284,10 +284,11 @@
 <div class="modal-overlay" id="studentModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Add Student</h3>
+      <h3 id="studentModalTitle">Add Student</h3>
       <button class="modal-close" onclick="closeStudentModal()">✕</button>
     </div>
     <div class="modal-body">
+      <input type="hidden" id="editStudentId" />
       <div class="form-row">
         <div class="form-group">
           <label>Full Name *</label>
@@ -304,7 +305,7 @@
           <input type="text" id="sUser" class="form-input" placeholder="login username" />
         </div>
         <div class="form-group">
-          <label>Password *</label>
+          <label id="sPassLabel">Password *</label>
           <input type="password" id="sPass" class="form-input" placeholder="password" />
         </div>
       </div>
@@ -316,7 +317,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeStudentModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveStudent()">Add Student</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save</button>
     </div>
   </div>
 </div>

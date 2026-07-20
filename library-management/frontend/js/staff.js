@@ -4,7 +4,7 @@ let currentUser = null;
 let allIssues   = [];
 let selectedStudentId = null;
 let selectedBookId    = null;
-
+let allStudents = [];
 // ── INIT ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = authGuard('staff');
@@ -355,8 +355,9 @@ async function loadStudents() {
   const q = document.getElementById('studentSearch').value;
   try {
     const students = await api(`/api/students?search=${encodeURIComponent(q)}`);
+    allStudents = students;
     if (!students.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="loading-row">No students found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="loading-row">No students found</td></tr>';
       return;
     }
     tbody.innerHTML = students.map(s => `
@@ -366,34 +367,87 @@ async function loadStudents() {
         <td>${s.email || '—'}</td>
         <td><span class="badge badge-purple">${s.roll_number}</span></td>
         <td>${fmt(s.created_at)}</td>
+        <td>
+          <div class="action-group">
+            <button class="btn btn-sm btn-amber" onclick="openStudentModal(${s.id})">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteStudent(${s.id}, '${s.name.replace(/'/g,"\\'")}')">🗑️</button>
+          </div>
+        </td>
       </tr>
     `).join('');
   } catch(e) {}
 }
 
-function openStudentModal()  { document.getElementById('studentModal').classList.add('open'); }
-function closeStudentModal() { document.getElementById('studentModal').classList.remove('open'); }
+function openStudentModal(id = null) {
+  document.getElementById('editStudentId').value = id || '';
+  document.getElementById('studentModalTitle').textContent = id ? 'Edit Student' : 'Add Student';
+  document.getElementById('studentFormMsg').className = 'form-msg';
+
+  if (id) {
+    const s = allStudents.find(x => x.id === id);
+    if (s) {
+      document.getElementById('sName').value  = s.name;
+      document.getElementById('sRoll').value  = s.roll_number;
+      document.getElementById('sUser').value  = s.username;
+      document.getElementById('sEmail').value = s.email || '';
+    }
+    document.getElementById('sPass').value = '';
+    document.getElementById('sPass').placeholder = 'Leave blank to keep current password';
+    document.getElementById('sPassLabel').textContent = 'Reset Password (optional)';
+  } else {
+    ['sName','sRoll','sUser','sPass','sEmail'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sPass').placeholder = 'password';
+    document.getElementById('sPassLabel').textContent = 'Password *';
+  }
+  document.getElementById('studentModal').classList.add('open');
+}
+
+function closeStudentModal() {
+  document.getElementById('studentModal').classList.remove('open');
+}
 
 async function saveStudent() {
+  const id    = document.getElementById('editStudentId').value;
   const msgEl = document.getElementById('studentFormMsg');
-  const payload = {
-    name:        document.getElementById('sName').value.trim(),
-    roll_number: document.getElementById('sRoll').value.trim(),
-    username:    document.getElementById('sUser').value.trim(),
-    password:    document.getElementById('sPass').value,
-    email:       document.getElementById('sEmail').value.trim(),
-  };
-  if (!payload.name || !payload.roll_number || !payload.username || !payload.password) {
-    setMsg(msgEl, 'Name, roll number, username and password are required', 'error');
+  const name  = document.getElementById('sName').value.trim();
+  const roll  = document.getElementById('sRoll').value.trim();
+  const user  = document.getElementById('sUser').value.trim();
+  const pass  = document.getElementById('sPass').value;
+  const email = document.getElementById('sEmail').value.trim();
+
+  if (!name || !roll || !user) {
+    setMsg(msgEl, 'Name, roll number and username are required', 'error');
     return;
   }
+  if (!id && !pass) {
+    setMsg(msgEl, 'Password is required for new students', 'error');
+    return;
+  }
+
   try {
-    await api('/api/students', { method: 'POST', body: JSON.stringify(payload) });
-    showToast('Student added!', 'success');
+    if (id) {
+      const payload = { name, roll_number: roll, email };
+      if (pass) payload.password = pass;
+      await api(`/api/students/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      showToast('Student updated!', 'success');
+    } else {
+      await api('/api/students', { method: 'POST', body: JSON.stringify({ name, roll_number: roll, username: user, password: pass, email }) });
+      showToast('Student added!', 'success');
+    }
     closeStudentModal();
     loadStudents();
     loadStats();
   } catch(e) { setMsg(msgEl, e.message, 'error'); }
+}
+
+async function deleteStudent(id, name) {
+  if (!confirm(`Remove "${name}"?\nThey will no longer be able to log in.`)) return;
+  try {
+    await api(`/api/students/${id}`, { method: 'DELETE' });
+    showToast('Student removed', 'success');
+    loadStudents();
+    loadStats();
+  } catch(e) { showToast(e.message, 'error'); }
 }
 
 // ── HELPERS ────────────────────────────────────────────────────

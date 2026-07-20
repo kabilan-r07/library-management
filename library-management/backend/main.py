@@ -298,6 +298,60 @@ def add_student(student: StudentCreate, db=Depends(get_db)):
             raise HTTPException(status_code=400, detail="Username or roll number already exists")
         raise HTTPException(status_code=500, detail=str(e))
 
+class StudentUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    roll_number: Optional[str] = None
+    password: Optional[str] = None
+
+@app.put("/api/students/{student_id}")
+def update_student(student_id: int, student: StudentUpdate, db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
+    existing = cursor.fetchone()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    fields, params = [], []
+    if student.name is not None:
+        fields.append("name = %s"); params.append(student.name)
+    if student.email is not None:
+        fields.append("email = %s"); params.append(student.email)
+    if student.roll_number is not None:
+        fields.append("roll_number = %s"); params.append(student.roll_number)
+    if student.password:
+        fields.append("password_hash = %s"); params.append(hash_password(student.password))
+
+    if not fields:
+        return {"success": True, "message": "No changes"}
+
+    params.append(student_id)
+    try:
+        cursor.execute(f"UPDATE students SET {', '.join(fields)} WHERE id = %s", params)
+        db.commit()
+        return {"success": True, "message": "Student updated"}
+    except Error as e:
+        if "Duplicate" in str(e):
+            raise HTTPException(status_code=400, detail="Roll number already exists")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/students/{student_id}")
+def delete_student(student_id: int, db=Depends(get_db)):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT COUNT(*) as cnt FROM issued_books WHERE student_id = %s AND return_date IS NULL",
+        (student_id,)
+    )
+    if cursor.fetchone()["cnt"] > 0:
+        raise HTTPException(status_code=400, detail="Cannot delete: student has books not yet returned")
+    cursor.execute("SELECT COUNT(*) as cnt FROM students WHERE id = %s", (student_id,))
+    if cursor.fetchone()["cnt"] == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+    cursor.execute("DELETE FROM students WHERE id = %s", (student_id,))
+    db.commit()
+    return {"success": True, "message": "Student removed"}
+
+
 # ── DASHBOARD STATS ────────────────────────────────────────────────────────────
 @app.get("/api/stats")
 def get_stats(db=Depends(get_db)):
